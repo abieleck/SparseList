@@ -22,7 +22,7 @@ public class Main {
         sparseList.add(2,0);
         System.out.println(sparseList);
 
-        System.out.println("Removing value of 2");
+        System.out.println("Removing value of 0");
         sparseList.remove(new Integer(0));
         System.out.println(sparseList);
 

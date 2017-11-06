@@ -6,14 +6,8 @@ import java.util.*;
 public class SparseList<E> implements List<E> {
 
     private final E defaultValue;
-    private HashMap<Integer, E> sparseMap = new HashMap<>();
+    private TreeMap<Integer, E> sparseMap = new TreeMap<>();
     private int size;
-
-    private Integer[] sortedKeyArray() {
-        Integer[] result = sparseMap.keySet().toArray(new Integer[0]);
-        Arrays.sort(result);
-        return result;
-    }
 
     public SparseList(E defaultValue) {
 
@@ -271,15 +265,11 @@ public class SparseList<E> implements List<E> {
         if (index < 0 || index > size()) {
             throw new IndexOutOfBoundsException();
         }
-
-        Integer[] keyArray = sortedKeyArray();
-        int shiftStart = Arrays.binarySearch(keyArray, index);
-        if (shiftStart < 0) {
-            shiftStart = -shiftStart;
-        }
-        for (int i=keyArray.length-1; i>= shiftStart; i--) {
-            E e = sparseMap.remove(keyArray[i]);
-            sparseMap.put(keyArray[i] + 1, e);
+        Integer key = sparseMap.lastKey();
+        while (key != null && key >= index) {
+            E e = sparseMap.remove(key);
+            sparseMap.put(key + 1, e);
+            key = sparseMap.lowerKey(key);
         }
         if(!element.equals(defaultValue)) {
             sparseMap.put(index, element);
@@ -292,12 +282,12 @@ public class SparseList<E> implements List<E> {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException();
         }
+        Integer key = sparseMap.higherKey(index);
         E result = sparseMap.remove(index);
-        Integer[] keyArray = sortedKeyArray();
-        int shiftStart = -(Arrays.binarySearch(keyArray, index) + 1);
-        for (int i = shiftStart; i<keyArray.length; i++) {
-            E value = sparseMap.remove(keyArray[i]);
-            sparseMap.put(keyArray[i]-1, value);
+        while (key != null) {
+            E value = sparseMap.remove(key);
+            sparseMap.put(key-1, value);
+            key = sparseMap.higherKey(key);
         }
         size--;
         return result;
@@ -318,10 +308,11 @@ public class SparseList<E> implements List<E> {
             }
             return i;
         }
-        Integer[] keyArray = sortedKeyArray();
-        for (int i=0; i< keyArray.length; i++) {
-            if (sparseMap.get(keyArray[i]).equals(o)) {
-                return keyArray[i];
+        Iterator<Integer> keySetIterator = sparseMap.navigableKeySet().iterator();
+        while (keySetIterator.hasNext()) {
+            int i = keySetIterator.next();
+            if (sparseMap.get(i).equals(o)) {
+                return i;
             }
         }
         return -1;
@@ -343,10 +334,11 @@ public class SparseList<E> implements List<E> {
             }
             return i;
         }
-        Integer[] keyArray = sortedKeyArray();
-        for(int i=keyArray.length-1; i>=0; i--) {
-            if (sparseMap.get(keyArray[i]).equals(o)) {
-                return keyArray[i];
+        Iterator<Integer> descKeyIterator= sparseMap.descendingKeySet().iterator();
+        while (descKeyIterator.hasNext()) {
+            int i = descKeyIterator.next();
+            if (sparseMap.get(i).equals(o)) {
+                return i;
             }
         }
         return -1;
@@ -373,14 +365,17 @@ public class SparseList<E> implements List<E> {
 
     @Override
     public String toString() {
-        String result = "[";
+        StringBuilder result = new StringBuilder();
+        result.append("[");
         if (size > 0) {
-            result += get(0).toString();
+            result.append(get(0).toString());
         }
         for (int i=1; i< size; i++) {
-            result += (", " + get(i).toString());
+            result.append(", ");
+            result.append(get(i).toString());
         }
-        return result + "]";
+        result.append("]");
+        return result.toString();
 
     }
 

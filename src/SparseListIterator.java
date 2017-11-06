@@ -4,11 +4,11 @@ import java.util.function.Consumer; // dlaczego bez tego IDE wywala błąd?
 public class SparseListIterator<E> implements ListIterator<E> {
 
     SparseList<E> myList;
-    private HashMap<Integer, E> sparseMap = new HashMap<>();
+    private TreeMap<Integer, E> sparseMap = new TreeMap<>();
     private int indexOfNext;
     private boolean removeAllowed;
 
-    public SparseListIterator(SparseList<E> myList, HashMap<Integer, E> sparseMap) {
+    public SparseListIterator(SparseList<E> myList, TreeMap<Integer, E> sparseMap) {
         this.myList = myList;
         this.sparseMap = sparseMap;
     }
